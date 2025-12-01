@@ -106,3 +106,44 @@ export interface EligibilityResult {
   score_reference?: string | null;
   checklist: string[];
 }
+
+/**
+ * ============================================================
+ * 대화형 질의응답 (Chat) 타입
+ * ============================================================
+ */
+
+/**
+ * 채팅 메시지
+ */
+export interface ChatMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp?: string;
+}
+
+/**
+ * 채팅 요청
+ */
+export interface ChatRequest {
+  doc_id: string;
+  doc_context: DocAnalysisResult;
+  messages: ChatMessage[];
+}
+
+/**
+ * 추천 질문
+ */
+export interface SuggestedQuestion {
+  text: string;
+  category: "deadline" | "amount" | "method" | "general";
+}
+
+/**
+ * 채팅 응답
+ */
+export interface ChatResponse {
+  message: string;
+  suggestions: SuggestedQuestion[];
+  confidence: number;
+}

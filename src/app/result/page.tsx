@@ -9,9 +9,8 @@ import type {
   IncomeLevel,
   SpecialQualification,
 } from "@/lib/types";
-import EvidenceList from "@/components/EvidenceList";
-import KeyFactsCard from "@/components/KeyFactsCard";
 import ResultSummaryCard from "@/components/ResultSummaryCard";
+import ChatInterface from "@/components/ChatInterface";
 
 export default function ResultPage() {
   const [data, setData] = useState<DocAnalysisResult | null>(null);
@@ -73,51 +72,18 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4 sm:py-12">
-      <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8">
-        {/* ① 문서 핵심 요약 블록 */}
-        <section className="space-y-4 sm:space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
-                문서 핵심 요약
-              </h1>
-              <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-                어떤 공고인지 / 언제 / 어디서 / 누구를 뽑는지 한눈에 보기
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:py-12">
+        {/* 왼쪽 패널: 문서 요약 */}
+        <div className="flex-1 space-y-6 overflow-y-auto sm:space-y-8">
+          {/* 문서 분석 결과 */}
+          <section className="space-y-4 sm:space-y-6">
 
-          <ResultSummaryCard summary={data.summary} actions={data.actions} />
-          <KeyFactsCard extracted={data.extracted} />
-
-          <EvidenceList evidence={data.evidence} />
-
-          {/* 불확실한 정보 (선택적 표시) */}
-          {data.uncertainty.length > 0 && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-lg sm:rounded-2xl sm:p-8">
-              <h2 className="mb-4 text-xl font-bold text-amber-900 sm:mb-6 sm:text-2xl">
-                ⚠️ 불확실한 정보
-              </h2>
-              <div className="space-y-3 sm:space-y-4">
-                {data.uncertainty.map((item, index) => (
-                  <div key={index} className="rounded-lg bg-white p-3 sm:p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700 sm:px-3 sm:text-sm">
-                        {item.field}
-                      </span>
-                      <span className="text-xs font-medium text-amber-600">
-                        신뢰도 {Math.round(item.confidence * 100)}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-700 sm:text-sm">
-                      {item.reason}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <ResultSummaryCard 
+            summary={data.summary} 
+            actions={data.actions}
+            extracted={data.extracted}
+          />
         </section>
 
         {/* ② 내 조건 적용하기 블록 */}
@@ -155,8 +121,20 @@ export default function ResultPage() {
           </p>
         </section>
 
-        {/* 내 조건 입력 모달 */}
-        {isModalOpen && (
+        {/* 모바일: 채팅 섹션 (하단) */}
+        <section className="lg:hidden">
+          <ChatInterface docResult={data} />
+        </section>
+        </div>
+
+        {/* 데스크톱: 오른쪽 패널 채팅 고정 */}
+        <div className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[420px] lg:block">
+          <ChatInterface docResult={data} />
+        </div>
+      </div>
+
+      {/* 내 조건 입력 모달 */}
+      {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
               <div className="mb-4 flex items-start justify-between sm:mb-6">
@@ -668,7 +646,6 @@ export default function ResultPage() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
