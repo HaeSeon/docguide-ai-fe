@@ -105,7 +105,7 @@ export default function Home() {
               ref={fileInputRef}
               type="file"
               onChange={handleFileSelect}
-              accept=".pdf,.hwp,.doc,.docx,.jpg,.jpeg,.png"
+              accept=".pdf,.txt,.hwp,.doc,.docx,.jpg,.jpeg,.png"
               className="hidden"
             />
 
@@ -166,7 +166,7 @@ export default function Home() {
                     주택청약 공고문, 지원금 공고, 고지서 파일을 업로드해 주세요
                   </p>
                   <p className="text-xs text-gray-400">
-                    PDF / HWP / 이미지 (최대 10MB)
+                    PDF / TXT / HWP / 이미지 (최대 10MB)
                   </p>
                 </div>
               </div>
