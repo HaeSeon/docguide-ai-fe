@@ -170,7 +170,7 @@ export default function Home() {
                     주택청약 공고문, 지원금 공고, 고지서 파일을 업로드해 주세요
                   </p>
                   <p className="text-xs text-gray-400">
-                    PDF / TXT / HWP / 이미지 (최대 10MB)
+                    PDF / TXT (추후 확장 예정)
                   </p>
                 </div>
               </div>
