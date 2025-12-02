@@ -147,3 +147,49 @@ export interface ChatResponse {
   suggestions: SuggestedQuestion[];
   confidence: number;
 }
+
+// ============================================================
+// 취업지원금 자격 확인 관련 타입
+// ============================================================
+
+/**
+ * 취업지원금 사용자 프로필 (입력 정보)
+ */
+export interface JobSupportUserProfile {
+  // 기본 정보
+  age: number;
+
+  // 가구 정보
+  household_size: number;
+
+  // 소득 정보
+  household_monthly_income: number | null;
+
+  // 재산 정보
+  household_total_assets: number | null;
+
+  // 취업 경험
+  work_experience_days: number | null;
+  work_experience_hours: number | null;
+
+  // 특별 조건
+  is_receiving_unemployment: boolean;
+  is_youth: boolean | null;
+  is_senior: boolean | null;
+  special_category:
+    | "none"
+    | "career_break_woman"
+    | "special_worker"
+    | "homeless";
+}
+
+/**
+ * 취업지원금 자격 평가 결과
+ */
+export interface JobSupportEligibilityResult {
+  eligible_type: "type_1" | "type_2" | "ineligible";
+  status_message: string;
+  expected_benefit: string | null;
+  checklist: string[];
+  warnings: string[];
+}

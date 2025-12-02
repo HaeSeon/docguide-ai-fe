@@ -43,9 +43,14 @@ export default function ResultSummaryCard({
 
   // 핵심 행동 메시지 생성 (summary의 첫 문장 사용)
   const getMainAction = () => {
-    // summary에서 첫 문장 추출 (마침표나 줄바꿈 기준)
-    const firstSentence = summary.split(/[.\n]/)[0].trim();
-    return firstSentence || summary;
+    // 문장 끝 (마침표/물음표/느낌표 + 공백 또는 문자열 끝)을 찾음
+    // URL의 점은 뒤에 공백이 없으므로 제외됨
+    const match = summary.match(/^.+?[.?!](?=\s|$)/);
+    if (match) {
+      return match[0].trim();
+    }
+    // 매칭 실패 시 줄바꿈 기준으로 첫 줄 또는 전체
+    return summary.split("\n")[0].trim() || summary;
   };
 
   return (

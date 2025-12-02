@@ -11,9 +11,12 @@ import type {
 } from "@/lib/types";
 import ResultSummaryCard from "@/components/ResultSummaryCard";
 import ChatInterface from "@/components/ChatInterface";
+import JobSupportEligibilityModal from "@/components/JobSupportEligibilityModal";
 
 export default function ResultPage() {
   const [data, setData] = useState<DocAnalysisResult | null>(null);
+
+  // 주택청약 모달 관련 state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profile, setProfile] = useState<EligibilityUserProfile>({
     is_seoul_resident: true,
@@ -25,6 +28,9 @@ export default function ResultPage() {
     useState<EligibilityResult | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [eligibilityError, setEligibilityError] = useState<string | null>(null);
+
+  // 취업지원금 모달 관련 state
+  const [isJobSupportModalOpen, setIsJobSupportModalOpen] = useState(false);
 
   useEffect(() => {
     const storedData = sessionStorage.getItem("doc-result");
@@ -78,55 +84,90 @@ export default function ResultPage() {
         <div className="flex-1 space-y-6 overflow-y-auto sm:space-y-8">
           {/* 문서 분석 결과 */}
           <section className="space-y-4 sm:space-y-6">
-
-          <ResultSummaryCard 
-            summary={data.summary} 
-            actions={data.actions}
-            extracted={data.extracted}
-          />
-        </section>
-
-        {/* ② 내 조건 적용하기 블록 (주택청약 문서일 때만 표시) */}
-        {data.extracted.docType === "housing_application_notice" && (
-          <section className="rounded-xl bg-white p-4 shadow-lg sm:rounded-2xl sm:p-8">
-            <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
-                  내 조건 적용하기
-                </h2>
-                <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-                  내 거주지·가구 정보·소득 수준을 넣고 신청 가능성을 간단히
-                  확인해보세요.
-                </p>
-              </div>
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 sm:text-sm">
-                선택 입력 · 약 30초 소요
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEligibilityError(null);
-                setIsModalOpen(true);
-              }}
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 sm:w-auto sm:px-6 sm:py-3 sm:text-base"
-            >
-              내 조건으로 신청 가능 여부 확인하기
-            </button>
-
-            <p className="mt-3 text-xs text-gray-500 sm:mt-4 sm:text-sm">
-              버튼을 누르면 간단한 질문(거주지, 가구 구성, 소득 수준 등)에 답한
-              뒤, AI가 신청 가능 여부와 예상 배점, 지금 해야 할 체크리스트를
-              정리해 드립니다.
-            </p>
+            <ResultSummaryCard
+              summary={data.summary}
+              actions={data.actions}
+              extracted={data.extracted}
+            />
           </section>
-        )}
 
-        {/* 모바일: 채팅 섹션 (하단) */}
-        <section className="lg:hidden">
-          <ChatInterface docResult={data} />
-        </section>
+          {/* ② 내 조건 적용하기 블록 (주택청약 문서일 때만 표시) */}
+          {data.extracted.docType === "housing_application_notice" && (
+            <section className="rounded-xl bg-white p-4 shadow-lg sm:rounded-2xl sm:p-8">
+              <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
+                    내 조건 적용하기
+                  </h2>
+                  <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+                    내 거주지·가구 정보·소득 수준을 넣고 신청 가능성을 간단히
+                    확인해보세요.
+                  </p>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 sm:text-sm">
+                  선택 입력 · 약 30초 소요
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEligibilityError(null);
+                  setIsModalOpen(true);
+                }}
+                className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 sm:w-auto sm:px-6 sm:py-3 sm:text-base"
+              >
+                내 조건으로 신청 가능 여부 확인하기
+              </button>
+
+              <p className="mt-3 text-xs text-gray-500 sm:mt-4 sm:text-sm">
+                버튼을 누르면 간단한 질문(거주지, 가구 구성, 소득 수준 등)에
+                답한 뒤, AI가 신청 가능 여부와 예상 배점, 지금 해야 할
+                체크리스트를 정리해 드립니다.
+              </p>
+            </section>
+          )}
+
+          {/* ③ 내 조건 확인하기 블록 (취업지원금 문서일 때만 표시) */}
+          {(data.extracted.docType === "subsidy_notice" ||
+            data.extracted.docType === "employment_support" ||
+            data.extracted.docType === "job_support") && (
+            <section className="rounded-xl bg-white p-4 shadow-lg sm:rounded-2xl sm:p-8">
+              <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
+                    💼 내 조건 확인하기
+                  </h2>
+                  <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+                    나이, 소득, 취업경험 등을 입력하면 신청 자격을
+                    평가해드립니다.
+                  </p>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-600 sm:text-sm">
+                  선택 입력 · 약 1분 소요
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsJobSupportModalOpen(true)}
+                className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 sm:w-auto sm:px-6 sm:py-3 sm:text-base"
+              >
+                내 조건으로 자격 확인하기
+              </button>
+
+              <p className="mt-3 text-xs text-gray-500 sm:mt-4 sm:text-sm">
+                버튼을 누르면 간단한 질문(나이, 가구 소득/재산, 취업 경험 등)에
+                답한 뒤, AI가 I유형/II유형 신청 가능 여부와 예상 지원 내용, 준비
+                사항을 정리해 드립니다.
+              </p>
+            </section>
+          )}
+
+          {/* 모바일: 채팅 섹션 (하단) */}
+          <section className="lg:hidden">
+            <ChatInterface docResult={data} />
+          </section>
         </div>
 
         {/* 데스크톱: 오른쪽 패널 채팅 고정 */}
@@ -136,7 +177,8 @@ export default function ResultPage() {
       </div>
 
       {/* 내 조건 입력 모달 (주택청약 문서일 때만) */}
-      {isModalOpen && data.extracted.docType === "housing_application_notice" && (
+      {isModalOpen &&
+        data.extracted.docType === "housing_application_notice" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
               <div className="mb-4 flex items-start justify-between sm:mb-6">
@@ -648,6 +690,15 @@ export default function ResultPage() {
             </div>
           </div>
         )}
+
+      {/* 취업지원금 모달 */}
+      {data && (
+        <JobSupportEligibilityModal
+          isOpen={isJobSupportModalOpen}
+          onClose={() => setIsJobSupportModalOpen(false)}
+          docResult={data}
+        />
+      )}
     </div>
   );
 }
