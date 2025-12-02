@@ -101,7 +101,8 @@ export default function ResultPage() {
           </section>
 
           {/* ② 내 조건 적용하기 블록 (주택청약 문서일 때만 표시) */}
-          {data.extracted.docType === "housing_application_notice" && (
+          {(data.extracted.docType === "housing_application_notice" ||
+            data.extracted.docType === "housing_application") && (
             <section className="rounded-xl bg-white p-4 shadow-lg sm:rounded-2xl sm:p-8">
               <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -199,7 +200,8 @@ export default function ResultPage() {
 
       {/* 내 조건 입력 모달 (주택청약 문서일 때만) */}
       {isModalOpen &&
-        data.extracted.docType === "housing_application_notice" && (
+        (data.extracted.docType === "housing_application_notice" ||
+          data.extracted.docType === "housing_application") && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
               <div className="mb-4 flex items-start justify-between sm:mb-6">
