@@ -146,6 +146,7 @@ export interface ChatResponse {
   message: string;
   suggestions: SuggestedQuestion[];
   confidence: number;
+  sources?: AnswerSource[];
 }
 
 /**

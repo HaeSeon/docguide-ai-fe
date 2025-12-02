@@ -13,6 +13,7 @@ import ResultSummaryCard from "@/components/ResultSummaryCard";
 import ChatInterface from "@/components/ChatInterface";
 import JobSupportEligibilityModal from "@/components/JobSupportEligibilityModal";
 import DocumentViewerModal from "@/components/DocumentViewerModal";
+import { buildApiUrl } from "@/lib/api";
 
 export default function ResultPage() {
   const [data, setData] = useState<DocAnalysisResult | null>(null);
@@ -233,7 +234,7 @@ export default function ResultPage() {
 
                   try {
                     const response = await fetch(
-                      "http://localhost:8000/api/analyze/eligibility",
+                      buildApiUrl("/api/analyze/eligibility"),
                       {
                         method: "POST",
                         headers: {

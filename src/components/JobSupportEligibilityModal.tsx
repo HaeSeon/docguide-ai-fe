@@ -6,6 +6,7 @@ import type {
   JobSupportUserProfile,
   JobSupportEligibilityResult,
 } from "@/lib/types";
+import { buildApiUrl } from "@/lib/api";
 
 interface JobSupportEligibilityModalProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export default function JobSupportEligibilityModal({
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/analyze/job-support-eligibility",
+        buildApiUrl("/api/analyze/job-support-eligibility"),
         {
           method: "POST",
           headers: {

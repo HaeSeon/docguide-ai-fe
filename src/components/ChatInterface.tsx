@@ -9,6 +9,7 @@ import type {
   DocAnalysisResult,
   SuggestedQuestion,
 } from "@/lib/types";
+import { buildApiUrl } from "@/lib/api";
 import ChatBubble from "./ChatBubble";
 import SuggestedQuestions from "./SuggestedQuestions";
 
@@ -43,7 +44,7 @@ export default function ChatInterface({
     try {
       const docType = docResult.extracted.docType;
       const response = await fetch(
-        `http://localhost:8000/api/chat/suggestions/${docType}?limit=3`
+        buildApiUrl(`/api/chat/suggestions/${docType}?limit=3`)
       );
       if (response.ok) {
         const data: SuggestedQuestion[] = await response.json();
@@ -81,7 +82,7 @@ export default function ChatInterface({
         messages: updatedMessages,
       };
 
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch(buildApiUrl("/api/chat"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,18 +108,15 @@ export default function ChatInterface({
 
       setMessages((prev) => [...prev, assistantMessage]);
       setSuggestions(data.suggestions);
-      // @ts-expect-error - 백엔드에서 추가된 sources 필드를 런타임에서 함께 사용
-      if ((data as any).sources) {
-        setLastSources((data as any).sources as AnswerSource[]);
+      if (data.sources && data.sources.length > 0) {
+        setLastSources(data.sources);
       } else {
         setLastSources([]);
       }
     } catch (err) {
       console.error("채팅 오류:", err);
       setError(
-        err instanceof Error
-          ? err.message
-          : "답변 생성 중 오류가 발생했습니다."
+        err instanceof Error ? err.message : "답변 생성 중 오류가 발생했습니다."
       );
     } finally {
       setIsLoading(false);
@@ -161,7 +159,10 @@ export default function ChatInterface({
       </div>
 
       {/* 메시지 영역 */}
-      <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6" style={{ minHeight: "300px" }}>
+      <div
+        className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6"
+        style={{ minHeight: "300px" }}
+      >
         {messages.length === 0 ? (
           <div className="flex h-full min-h-[200px] flex-col items-center justify-center text-center">
             <div className="mb-4 text-4xl">🤖</div>
@@ -185,7 +186,10 @@ export default function ChatInterface({
                 </p>
                 <ul className="space-y-1.5">
                   {lastSources.map((source, index) => (
-                    <li key={index} className="flex items-start justify-between gap-2">
+                    <li
+                      key={index}
+                      className="flex items-start justify-between gap-2"
+                    >
                       <span className="flex-1">
                         {source.text.length > 120
                           ? `${source.text.slice(0, 120)}…`
@@ -273,4 +277,3 @@ export default function ChatInterface({
     </div>
   );
 }
-

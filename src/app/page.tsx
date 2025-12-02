@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { DocAnalysisResult } from "@/lib/types";
+import { buildApiUrl } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function Home() {
       formData.append("file", file);
 
       // FastAPI 서버로 요청 전송
-      const response = await fetch("http://localhost:8000/api/analyze", {
+      const response = await fetch(buildApiUrl("/api/analyze"), {
         method: "POST",
         body: formData,
       });
