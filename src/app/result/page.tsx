@@ -12,6 +12,7 @@ import type {
 import ResultSummaryCard from "@/components/ResultSummaryCard";
 import ChatInterface from "@/components/ChatInterface";
 import JobSupportEligibilityModal from "@/components/JobSupportEligibilityModal";
+import DocumentViewerModal from "@/components/DocumentViewerModal";
 
 export default function ResultPage() {
   const [data, setData] = useState<DocAnalysisResult | null>(null);
@@ -31,9 +32,13 @@ export default function ResultPage() {
 
   // 취업지원금 모달 관련 state
   const [isJobSupportModalOpen, setIsJobSupportModalOpen] = useState(false);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [viewerPage, setViewerPage] = useState<number | null>(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   useEffect(() => {
     const storedData = sessionStorage.getItem("doc-result");
+    const storedFileUrl = sessionStorage.getItem("doc-file-url");
     if (storedData) {
       try {
         const parsedData: DocAnalysisResult = JSON.parse(storedData);
@@ -41,6 +46,9 @@ export default function ResultPage() {
       } catch (error) {
         console.error("분석 결과 파싱 중 오류 발생:", error);
       }
+    }
+    if (storedFileUrl) {
+      setFileUrl(storedFileUrl);
     }
   }, []);
 
@@ -166,13 +174,25 @@ export default function ResultPage() {
 
           {/* 모바일: 채팅 섹션 (하단) */}
           <section className="lg:hidden">
-            <ChatInterface docResult={data} />
+            <ChatInterface
+              docResult={data}
+              onOpenViewer={(page) => {
+                setViewerPage(page ?? null);
+                setIsViewerOpen(true);
+              }}
+            />
           </section>
         </div>
 
         {/* 데스크톱: 오른쪽 패널 채팅 고정 */}
         <div className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[420px] lg:block">
-          <ChatInterface docResult={data} />
+          <ChatInterface
+            docResult={data}
+            onOpenViewer={(page) => {
+              setViewerPage(page ?? null);
+              setIsViewerOpen(true);
+            }}
+          />
         </div>
       </div>
 
@@ -699,6 +719,14 @@ export default function ResultPage() {
           docResult={data}
         />
       )}
+
+      {/* 문서 뷰어 모달 */}
+      <DocumentViewerModal
+        isOpen={isViewerOpen}
+        fileUrl={fileUrl}
+        initialPage={viewerPage ?? undefined}
+        onClose={() => setIsViewerOpen(false)}
+      />
     </div>
   );
 }

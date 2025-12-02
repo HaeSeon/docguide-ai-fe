@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type {
+  AnswerSource,
   ChatMessage,
   ChatRequest,
   ChatResponse,
@@ -13,14 +14,19 @@ import SuggestedQuestions from "./SuggestedQuestions";
 
 interface ChatInterfaceProps {
   docResult: DocAnalysisResult;
+  onOpenViewer?: (page?: number | null) => void;
 }
 
-export default function ChatInterface({ docResult }: ChatInterfaceProps) {
+export default function ChatInterface({
+  docResult,
+  onOpenViewer,
+}: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestedQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [lastSources, setLastSources] = useState<AnswerSource[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 자동 스크롤
@@ -53,6 +59,8 @@ export default function ChatInterface({ docResult }: ChatInterfaceProps) {
     if (!textToSend) return;
 
     setError(null);
+    // 새 질문을 시작할 때 이전 답변의 근거는 숨긴다
+    setLastSources([]);
 
     // 사용자 메시지 추가
     const userMessage: ChatMessage = {
@@ -99,6 +107,12 @@ export default function ChatInterface({ docResult }: ChatInterfaceProps) {
 
       setMessages((prev) => [...prev, assistantMessage]);
       setSuggestions(data.suggestions);
+      // @ts-expect-error - 백엔드에서 추가된 sources 필드를 런타임에서 함께 사용
+      if ((data as any).sources) {
+        setLastSources((data as any).sources as AnswerSource[]);
+      } else {
+        setLastSources([]);
+      }
     } catch (err) {
       console.error("채팅 오류:", err);
       setError(
@@ -122,16 +136,27 @@ export default function ChatInterface({ docResult }: ChatInterfaceProps) {
     <div className="flex h-full flex-col rounded-xl bg-white shadow-lg sm:rounded-2xl">
       {/* 헤더 */}
       <div className="border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">💬</span>
-          <div>
-            <h3 className="text-base font-semibold text-gray-900 sm:text-lg">
-              AI에게 질문하기
-            </h3>
-            <p className="text-xs text-gray-500">
-              이 문서에 대해 궁금한 점을 물어보세요
-            </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">💬</span>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 sm:text-lg">
+                AI에게 질문하기
+              </h3>
+              <p className="text-xs text-gray-500">
+                이 문서에 대해 궁금한 점을 물어보세요
+              </p>
+            </div>
           </div>
+          {onOpenViewer && (
+            <button
+              type="button"
+              onClick={() => onOpenViewer(null)}
+              className="hidden rounded-full border border-gray-200 px-3 py-1 text-[11px] font-medium text-gray-600 shadow-sm hover:bg-gray-50 sm:inline-flex"
+            >
+              원문 보기
+            </button>
+          )}
         </div>
       </div>
 
@@ -152,6 +177,39 @@ export default function ChatInterface({ docResult }: ChatInterfaceProps) {
             {messages.map((msg, idx) => (
               <ChatBubble key={idx} message={msg} />
             ))}
+            {/* 근거 정보 */}
+            {lastSources.length > 0 && (
+              <div className="mt-2 rounded-xl bg-indigo-50 p-3 text-xs text-gray-800 sm:text-sm">
+                <p className="mb-1 font-semibold text-indigo-800">
+                  📄 이 답변의 근거
+                </p>
+                <ul className="space-y-1.5">
+                  {lastSources.map((source, index) => (
+                    <li key={index} className="flex items-start justify-between gap-2">
+                      <span className="flex-1">
+                        {source.text.length > 120
+                          ? `${source.text.slice(0, 120)}…`
+                          : source.text}
+                        {source.page != null && (
+                          <span className="ml-1 text-[11px] text-indigo-700">
+                            ({source.page}페이지)
+                          </span>
+                        )}
+                      </span>
+                      {onOpenViewer && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenViewer(source.page ?? null)}
+                          className="ml-2 shrink-0 rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-indigo-700 shadow-sm ring-1 ring-indigo-100 hover:bg-indigo-50"
+                        >
+                          원문 보기
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {isLoading && (
               <div className="flex justify-start">
                 <div className="rounded-2xl bg-gray-100 px-4 py-3">

@@ -45,6 +45,10 @@ export default function Home() {
     setError(null);
 
     try {
+      // 원본 파일을 다시 열 수 있도록 브라우저 객체 URL 저장
+      const objectUrl = URL.createObjectURL(file);
+      sessionStorage.setItem("doc-file-url", objectUrl);
+
       // FormData 생성 및 파일 추가
       const formData = new FormData();
       formData.append("file", file);

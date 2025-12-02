@@ -148,6 +148,23 @@ export interface ChatResponse {
   confidence: number;
 }
 
+/**
+ * 채팅 응답 근거 (문서 내 출처 정보)
+ */
+export interface AnswerSource {
+  text: string;
+  page?: number | null;
+  field?: string | null;
+}
+
+/**
+ * 채팅 응답 + 근거를 함께 다루기 위한 헬퍼 타입
+ */
+export interface ChatAnswerWithSources {
+  response: ChatResponse;
+  sources: AnswerSource[];
+}
+
 // ============================================================
 // 취업지원금 자격 확인 관련 타입
 // ============================================================
